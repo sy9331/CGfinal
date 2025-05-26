@@ -131,7 +131,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="E:\汇报\25春实验报告\计算机图形学\实验报告文件\实验2\实验2\实验2\初始程序框架\glut.h" />
+    <ClInclude Include="glut.h" />
     <ClInclude Include="Header\interaction.h" />
     <ClInclude Include="Header\parser1.h" />
     <ClInclude Include="Header\render.h" />
