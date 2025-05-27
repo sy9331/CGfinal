@@ -5,12 +5,16 @@
 #include "parser1.h"     // 包含模型数据结构
 #include <glut.h>
 
-// 渲染模式枚举
-enum RenderMode {
-    FILL_MODE,
-    LINE_MODE,
-    POINT_MODE
-};
+//// 渲染模式枚举
+//enum RenderMode {
+//    FILL_MODE,
+//    LINE_MODE,
+//    POINT_MODE
+//};
+//enum CameraMode {
+//    ORBITAL_CAMERA, // 围绕中心点旋转
+//    FREE_LOOK_CAMERA // 自由平移和旋转
+//};
 
 // 全局渲染状态变量
 extern RenderMode g_currentRenderMode;
@@ -19,10 +23,25 @@ extern bool g_enableMaterial;
 extern bool g_displayCoordinates;
 extern bool g_displayInfo;
 
-// 相机变量 (示例，可根据交互模块的实际需求调整)
-extern float g_cameraX, g_cameraY, g_cameraZ;
-extern float g_lookAtX, g_lookAtY, g_lookAtZ;
-extern float g_upX, g_upY, g_upZ;
+// 相机变量 
+extern CameraMode g_currentCameraMode;
+
+extern float g_cameraPosX, g_cameraPosY, g_cameraPosZ;
+extern float g_cameraFrontX, g_cameraFrontY, g_cameraFrontZ; 
+extern float g_cameraUpX, g_cameraUpY, g_cameraUpZ; 
+
+//自由漫游相机
+extern float g_yaw;  
+extern float g_pitch;
+extern float g_roll;
+
+//轨道相机
+extern float g_orbitalDistance; 
+extern float g_orbitalYaw;      
+extern float g_orbitalPitch;  
+extern float g_orbitalRoll;
+extern float g_targetX, g_targetY, g_targetZ;
+
 
 // 旋转变量
 extern float g_rotateX, g_rotateY;
@@ -40,6 +59,10 @@ void toggleTexture();
 void toggleMaterial();
 void toggleCoordinatesDisplay();
 void toggleInfoDisplay();
+
+//相机模式切换
+void toggleCameraMode();
+
 
 // 绘制文本函数
 void drawText(float x, float y, const char* text);

@@ -1,5 +1,7 @@
 #include "../Header/render.h"
 #include <string>
+#include <cmath>
+#include<math.h>
 
 // 全局渲染状态变量定义
     RenderMode g_currentRenderMode = FILL_MODE;
@@ -9,13 +11,20 @@
     bool g_displayInfo = true;
     
     // 相机变量定义
-    float g_cameraX = 0.0f, g_cameraY = 0.0f, g_cameraZ = 5.0f;
-    float g_lookAtX = 0.0f, g_lookAtY = 0.0f, g_lookAtZ = 0.0f;
-    float g_upX = 0.0f, g_upY = 1.0f, g_upZ = 0.0f;
-    
-    // 旋转变量定义
-    float g_rotateX = 0.0f;
-    float g_rotateY = 0.0f;
+    float g_cameraPosX = 0.0f, g_cameraPosY = 0.0f, g_cameraPosZ = .0f;
+    float g_cameraFrontX = 0.0f, g_cameraFrontY = 0.0f, g_cameraFrontZ = -1.0f; // 初始向前看Z轴负方向
+    float g_cameraUpX = 0.0f, g_cameraUpY = 1.0f, g_cameraUpZ = 0.0f;
+
+    float g_yaw = -90.0f;  
+    float g_pitch = 0.0f;
+
+
+	CameraMode g_currentCameraMode = ORBITAL_CAMERA; // 默认轨道相机模式
+    float g_orbitalDistance = 5.0f;
+    float g_orbitalYaw = 0.0f;   
+    float g_orbitalPitch = 0.0f; 
+    float g_targetX = 0.0f, g_targetY = 0.0f, g_targetZ = 0.0f; 
+    const double M_PI = 3.14159265358979323846;
     
     // 绘制文本函数
     void drawText(float x, float y, const char* text) {
@@ -55,14 +64,20 @@
         glLoadIdentity();
     
         // 设置相机位置
-        gluLookAt(g_cameraX, g_cameraY, g_cameraZ,
-            g_lookAtX, g_lookAtY, g_lookAtZ,
-            g_upX, g_upY, g_upZ);
-    
-        // 应用模型旋转
-        glRotatef(g_rotateX, 1.0f, 0.0f, 0.0f);
-        glRotatef(g_rotateY, 0.0f, 1.0f, 0.0f);
-    
+        if (g_currentCameraMode == ORBITAL_CAMERA) {
+			glTranslated(-g_targetX, -g_targetY, -g_targetZ); 
+			glRotatef(g_orbitalYaw, 0.0f, 1.0f, 0.0f); 
+			glRotatef(g_orbitalPitch, 1.0f, 0.0f, 0.0f); 
+			glTranslatef(0.0f, 0.0f, -g_orbitalDistance); 
+        }
+        else { // FREE_LOOK_CAMERA
+            // 自由漫游相机：根据位置和前向向量设置
+            // 目标点 = 相机位置 + 相机前向向量
+            gluLookAt(g_cameraPosX, g_cameraPosY, g_cameraPosZ,
+                g_cameraPosX + g_cameraFrontX, g_cameraPosY + g_cameraFrontY, g_cameraPosZ + g_cameraFrontZ,
+                g_cameraUpX, g_cameraUpY, g_cameraUpZ);
+        }
+
         // 绘制坐标系 (拓展目标)
         if (g_displayCoordinates) {
             glDisable(GL_LIGHTING); // 禁用光照绘制坐标系
@@ -157,7 +172,6 @@
     
             glDisable(GL_TEXTURE_2D); // 每个子模型渲染完后禁用纹理，避免影响下一个
         }
-    
         // 显示提示信息 (拓展目标)
         if (g_displayInfo) {
             std::string mode_str;
@@ -172,9 +186,16 @@
             drawText(10, glutGet(GLUT_WINDOW_HEIGHT) - 80, (g_displayCoordinates ? "Coords: ON" : "Coords: OFF"));
     
             // 可以在这里添加更多信息，例如相机位置等
-            char cameraPos[100];
-            sprintf_s(cameraPos, "Camera: (%.2f, %.2f, %.2f)", g_cameraX, g_cameraY, g_cameraZ);
-            drawText(10, glutGet(GLUT_WINDOW_HEIGHT) - 100, cameraPos);
+            char cameraInfo[200];
+            if (g_currentCameraMode == ORBITAL_CAMERA) {
+                sprintf_s(cameraInfo, sizeof(cameraInfo), "Camera Mode: Orbital (Dist: %.2f, Yaw: %.0f, Pitch: %.0f)",
+                    g_orbitalDistance, g_orbitalYaw, g_orbitalPitch);
+            }
+            else {
+                sprintf_s(cameraInfo, sizeof(cameraInfo), "Camera Mode: Free Look (Pos: %.2f,%.2f,%.2f | Yaw:%.0f, Pitch:%.0f)",
+                    g_cameraPosX, g_cameraPosY, g_cameraPosZ, g_yaw, g_pitch);
+            }
+            drawText(10, glutGet(GLUT_WINDOW_HEIGHT) - 100, cameraInfo);
         }
     
     
@@ -191,17 +212,19 @@
     }
     
     void resetView() {
-        g_cameraX = 0.0f;
-        g_cameraY = 0.0f;
-        g_cameraZ = 5.0f;
-        g_lookAtX = 0.0f;
-        g_lookAtY = 0.0f;
-        g_lookAtZ = 0.0f;
-        g_upX = 0.0f;
-        g_upY = 1.0f;
-        g_upZ = 0.0f;
-        g_rotateX = 0.0f;
-        g_rotateY = 0.0f;
+        if (g_currentCameraMode == ORBITAL_CAMERA) {
+            g_orbitalDistance = 5.0f;
+            g_orbitalYaw = -90.0f;
+            g_orbitalPitch = 0.0f;
+            g_targetX = 0.0f; g_targetY = 0.0f; g_targetZ = 0.0f;
+        }
+        else {
+            g_cameraPosX = 0.0f; g_cameraPosY = 0.0f; g_cameraPosZ = 5.0f;
+            g_cameraFrontX = 0.0f; g_cameraFrontY = 0.0f; g_cameraFrontZ = -1.0f;
+            g_cameraUpX = 0.0f; g_cameraUpY = 1.0f; g_cameraUpZ = 0.0f;
+            g_yaw = -90.0f;
+            g_pitch = 0.0f;
+        }
         glutPostRedisplay();
     }
     
@@ -212,3 +235,40 @@
     void toggleMaterial() { g_enableMaterial = !g_enableMaterial; glutPostRedisplay(); }
     void toggleCoordinatesDisplay() { g_displayCoordinates = !g_displayCoordinates; glutPostRedisplay(); }
     void toggleInfoDisplay() { g_displayInfo = !g_displayInfo; glutPostRedisplay(); }
+    // 相机模式切换函数
+    void toggleCameraMode() {
+        if (g_currentCameraMode == ORBITAL_CAMERA) {
+            g_currentCameraMode = FREE_LOOK_CAMERA;
+            // 切换模式时，尝试让自由漫游相机的位置接近轨道相机的位置，以减少跳变
+            // 简单的转换：将轨道相机的位置复制给自由漫游相机
+            float yawRad = g_orbitalYaw * M_PI / 180.0f;
+            float pitchRad = g_orbitalPitch * M_PI / 180.0f;
+            g_cameraPosX = g_targetX + g_orbitalDistance * cos(pitchRad) * sin(yawRad);
+            g_cameraPosY = g_targetY + g_orbitalDistance * sin(pitchRad);
+            g_cameraPosZ = g_targetZ + g_orbitalDistance * cos(pitchRad) * cos(yawRad);
+            // 根据轨道相机的朝向，计算自由漫游相机的yaw和pitch
+            // 这里只是一个粗略的估计，更精确的需要使用atan2等
+            // 如果目标点在原点 (0,0,0)
+            // 自由漫游相机的前向向量是 (g_targetX - g_cameraPosX, g_targetY - g_cameraPosY, g_targetZ - g_cameraPosZ)
+            // 然后归一化，计算yaw和pitch
+            float dx = g_targetX - g_cameraPosX;
+            float dy = g_targetY - g_cameraPosY;
+            float dz = g_targetZ - g_cameraPosZ;
+            float len = sqrt(dx * dx + dy * dy + dz * dz);
+            if (len > 0.0001f) {
+                g_cameraFrontX = dx / len;
+                g_cameraFrontY = dy / len;
+                g_cameraFrontZ = dz / len;
+
+                g_yaw = atan2(g_cameraFrontX, g_cameraFrontZ) * 180.0f / M_PI; // 注意OpenGL的Z轴朝向和 atan2 的参数
+                g_pitch = asin(g_cameraFrontY) * 180.0f / M_PI;
+            }
+        }
+        else {
+            g_currentCameraMode = ORBITAL_CAMERA;
+            // 切换回轨道相机时，通常会将轨道相机的参数设置为默认值或者根据自由漫游相机的位置推算一个中心点
+            // 这里简单地重置轨道相机
+            resetView();
+        }
+        glutPostRedisplay();
+    }

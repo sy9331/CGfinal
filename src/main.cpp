@@ -2,16 +2,7 @@
 #include "../Header/parser1.h"
 #include "../Header/render.h"
 #include "../Header/interaction.h"
-#include <glut.h> // 或者 #include <GL/glut.h>
-// 全局变量定义 (在render.cpp和interaction.cpp中已声明)
-// Model g_model; // 在parser1.cpp中定义并初始化
-// RenderMode g_currentRenderMode; // 在render.cpp中定义并初始化
-// bool g_enableTexture, g_enableMaterial, g_displayCoordinates, g_displayInfo; // render.cpp
-// float g_cameraX, g_cameraY, g_cameraZ, g_lookAtX, g_lookAtY, g_lookAtZ, g_upX, g_upY, g_upZ; // render.cpp
-// float g_rotateX, g_rotateY; // render.cpp
-// int g_lastMouseX, g_lastMouseY; // interaction.cpp
-// bool g_isRotating, g_isPanning; // interaction.cpp
-
+#include <glut.h> 
 
 void initOpenGL() {
     // 启用深度测试
@@ -52,7 +43,6 @@ int main(int argc, char** argv) {
     initOpenGL();
 
     // 加载模型
-    // 确保你的 luweiqi.txt 文件在 assets/models 目录下
     if (!loadModel("assets/models/luweiqi.txt")) {
         std::cerr << "Failed to load model. Exiting." << std::endl;
         return 1;
@@ -65,7 +55,7 @@ int main(int argc, char** argv) {
     glutSpecialFunc(processSpecialKeys);
     glutMouseFunc(mouseButton);
     glutMotionFunc(mouseMove);
-    // glutIdleFunc(renderScene); // 如果需要连续动画，可以启用
+ 
 
     glutMainLoop();
 
