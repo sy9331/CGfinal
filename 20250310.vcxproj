@@ -137,12 +137,18 @@
     <ClInclude Include="Header\render.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\interaction.cpp" />
+    <ClCompile Include="src\interaction.cpp">
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\main.cpp">
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)</AdditionalIncludeDirectories>
     </ClCompile>
-    <ClCompile Include="src\parser1.cpp" />
-    <ClCompile Include="src\render.cpp" />
+    <ClCompile Include="src\parser1.cpp">
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <ClCompile Include="src\render.cpp">
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)</AdditionalIncludeDirectories>
+    </ClCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
