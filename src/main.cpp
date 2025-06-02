@@ -50,7 +50,7 @@ int main(int argc, char** argv) {
 
     // ×¢²á»Øµ÷º¯Êý
     glutDisplayFunc(renderScene);
-    glutReshapeFunc(changeSize);
+    glutReshapeFunc(reshape);
     glutKeyboardFunc(processNormalKeys);
     glutSpecialFunc(processSpecialKeys);
     glutMouseFunc(mouseButton);

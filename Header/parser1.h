@@ -19,7 +19,7 @@ struct Material {
     float specular[4];
     float emission[4];
     float shininess;
-    int textureIndex; // 0表示无纹理，实际索引需要-1
+    int textureIndex; 
 };
 
 // 顶点数据
@@ -69,4 +69,4 @@ extern Model g_model;
 bool loadModel(const char* filename);
 bool loadBMPTexture(const std::string& filepath, unsigned int& textureID);
 
-#endif // PARSER1_H
+#endif 

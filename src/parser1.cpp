@@ -1,25 +1,25 @@
 #include "../Header/parser1.h"
 #include <glut.h>
-Model g_model; // 全局模型实例
+Model g_model; 
 
-#pragma pack(push, 1) // 确保结构体成员紧密打包，无填充字节
+#pragma pack(push, 1) 
 
 struct BMPFileHeader {
-    unsigned short file_type;    // 文件类型，必须是 "BM" (0x4D42)
-    unsigned int file_size;      // 文件大小，单位字节
+    unsigned short file_type;    
+    unsigned int file_size;      
     unsigned short reserved1;
     unsigned short reserved2;
-    unsigned int pixel_offset;   // 像素数据起始位置相对于文件头的偏移量
+    unsigned int pixel_offset;   
 };
 
 struct BMPInfoHeader {
-    unsigned int header_size;    // 信息头大小，对于BITMAPINFOHEADER是40字节
-    int width;                   // 图像宽度
-    int height;                  // 图像高度
-    unsigned short planes;       // 平面数，必须是1
-    unsigned short bit_count;    // 每像素位数 (1, 4, 8, 16, 24, 32)
-    unsigned int compression;    // 压缩类型
-    unsigned int size_image;     // 图像大小（像素数据大小），如果未压缩则为0
+    unsigned int header_size;    
+    int width;                   
+    int height;                  
+    unsigned short planes;       
+    unsigned short bit_count;    
+    unsigned int compression;    
+    unsigned int size_image;     
     int x_pixels_per_meter;
     int y_pixels_per_meter;
     unsigned int colors_used;
@@ -43,16 +43,15 @@ bool loadBMPTexture(const std::string& filepath, unsigned int& textureID) {
     file.read(reinterpret_cast<char*>(&infoHeader), sizeof(BMPInfoHeader));
 
     // 检查BMP文件有效性
-    if (fileHeader.file_type != 0x4D42 || infoHeader.bit_count != 24) { // 检查"BM"和24位真彩色
+    if (fileHeader.file_type != 0x4D42 || infoHeader.bit_count != 24) { 
         std::cerr << "Error: " << filepath << " is not a valid 24-bit BMP file." << std::endl;
         file.close();
         return false;
     }
 
     // 计算图像数据大小
-    // BMP的行字节数必须是4的倍数，如果不是，需要填充
     int row_padded_size = ((infoHeader.width * infoHeader.bit_count + 31) / 32) * 4;
-    unsigned int imageSize = row_padded_size * std::abs(infoHeader.height); // 高度可能为负数 (倒置图像)
+    unsigned int imageSize = row_padded_size * std::abs(infoHeader.height); 
 
     std::vector<unsigned char> data(imageSize);
 
@@ -61,11 +60,7 @@ bool loadBMPTexture(const std::string& filepath, unsigned int& textureID) {
     file.read(reinterpret_cast<char*>(data.data()), imageSize);
     file.close();
 
-    // BMP通常是BGR顺序，OpenGL通常需要RGB。
-    // 由于我们是按行读取，每行可能需要填充，这里我们直接上传，
-    // 如果纹理显示颜色不对，可能需要在这里进行B-R通道交换。
-    // 例如： for (int i = 0; i < imageSize; i += 3) { std::swap(data[i], data[i+2]); }
-
+	// 生成纹理ID并绑定纹理
     glGenTextures(1, &textureID);
     glBindTexture(GL_TEXTURE_2D, textureID);
 
@@ -76,10 +71,8 @@ bool loadBMPTexture(const std::string& filepath, unsigned int& textureID) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     // 上传纹理数据
-    // 注意：BMP通常是BGR顺序，但OpenGL通常是RGB。GLUT默认可能处理BGR。
-    // 如果颜色不对，尝试将GL_BGR改为GL_RGB
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, infoHeader.width, std::abs(infoHeader.height),
-        0, GL_BGR_EXT, GL_UNSIGNED_BYTE, data.data()); // GL_BGR_EXT 或 GL_RGB
+        0, GL_BGR_EXT, GL_UNSIGNED_BYTE, data.data()); 
 
     gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGB, infoHeader.width, std::abs(infoHeader.height),
         GL_BGR_EXT, GL_UNSIGNED_BYTE, data.data());
@@ -87,7 +80,7 @@ bool loadBMPTexture(const std::string& filepath, unsigned int& textureID) {
     std::cout << "Texture " << filepath << " loaded successfully! ID: " << textureID << std::endl;
     return true;
 }
-
+// 加载模型函数
 bool loadModel(const char* filename) {
     std::ifstream file(filename);
     if (!file.is_open()) {
