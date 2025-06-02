@@ -76,7 +76,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>E:\汇报\25春实验报告\计算机图形学\实验报告文件\实验6\三维观察程序示例2</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>Y:\zhuanyeke\code-cpp\CG\20250310</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -138,7 +138,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\interaction.cpp" />
-    <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\main.cpp">
+      <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(ProjectDir)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\parser1.cpp" />
     <ClCompile Include="src\render.cpp" />
   </ItemGroup>
