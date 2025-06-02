@@ -29,22 +29,49 @@ void getCameraRightVector(float& rx, float& ry, float& rz) {
     float yawRad = g_orbitalYaw * M_PI / 180.0f;
     float pitchRad = g_orbitalPitch * M_PI / 180.0f;
 	// 计算相机位置
-    float camX = g_orbitalDistance * cos(pitchRad) * sin(yawRad);
-    float camY = g_orbitalDistance * sin(pitchRad);
-    float camZ = g_orbitalDistance * cos(pitchRad) * cos(yawRad);
-	// 计算当前前向向量
-    float currentFrontX = -camX; 
-    float currentFrontY = -camY;
-    float currentFrontZ = -camZ;
-    // 叉积计算右向量
+    float camRelX = g_orbitalDistance * sin(yawRad) * cos(pitchRad);
+    float camRelY = g_orbitalDistance * sin(pitchRad);
+    float camRelZ = g_orbitalDistance * cos(yawRad) * cos(pitchRad);
+	// 计算相机的前向量
+    float currentFrontX = -camRelX;
+    float currentFrontY = -camRelY;
+    float currentFrontZ = -camRelZ;
+    //归一化
+    float frontLen = sqrt(currentFrontX * currentFrontX + currentFrontY * currentFrontY + currentFrontZ * currentFrontZ);
+    if (frontLen > 0.0001f) {
+        currentFrontX /= frontLen;
+        currentFrontY /= frontLen;
+        currentFrontZ /= frontLen;
+    }
+    else {
+        rx = ry = rz = 0.0f;
+        std::cout << "DEBUG: Front Vector is zero. Cannot calculate Right Vector." << std::endl;
+        return;
+    }
+    //叉积计算右向量
     rx = currentFrontY * WORLD_UP_Z - currentFrontZ * WORLD_UP_Y;
     ry = currentFrontZ * WORLD_UP_X - currentFrontX * WORLD_UP_Z;
     rz = currentFrontX * WORLD_UP_Y - currentFrontY * WORLD_UP_X;
 	// 归一化右向量
-    float len = sqrt(rx * rx + ry * ry + rz * rz);
-    if (len > 0.0001f) {
-        rx /= len; ry /= len; rz /= len;
+    float rightLen = sqrt(rx * rx + ry * ry + rz * rz);
+    if (rightLen > 0.0001f) {
+        rx /= rightLen; ry /= rightLen; rz /= rightLen;
     }
+    else {
+        if (std::abs(g_orbitalPitch) > 89.0f) { 
+            if (g_orbitalYaw < 0) { 
+                rx = 1.0f; ry = 0.0f; rz = 0.0f; 
+            }
+            else { 
+                rx = -1.0f; ry = 0.0f; rz = 0.0f; 
+            }
+        }
+        else {
+            rx = ry = rz = 0.0f;
+            std::cout << "DEBUG: Right Vector magnitude is zero. Check input vectors." << std::endl;
+        }
+    }
+    std::cout << "DEBUG: getCameraRightVector Output: (" << rx << ", " << ry << ", " << rz << ")" << std::endl;
 }
 
 // 辅助函数：获取相机当前的向上向量
@@ -79,7 +106,7 @@ void getCameraUpVector(float& ux, float& uy, float& uz) {
 void processNormalKeys(unsigned char key, int x, int y) {
     float rightX, rightY, rightZ;
     float upX, upY, upZ;
-    float frontX, frontY, frontZ;
+    float frontX=0.0, frontY=0.0, frontZ=0.0;
     getCameraRightVector(rightX, rightY, rightZ);
     rightX = frontY * WORLD_UP_Z - frontZ * WORLD_UP_Y;
     rightY = frontZ * WORLD_UP_X - frontX * WORLD_UP_Z;
@@ -137,12 +164,14 @@ void processNormalKeys(unsigned char key, int x, int y) {
         break;
     case 'a': case 'A': // Pan Left (move target point left relative to camera's right vector)
         // 移动目标点，使其相对相机向左移动
+        std::cout << "DEBUG: Before Pan Left - Target: (" << g_targetX << ", " << g_targetY << ", " << g_targetZ << ")" << std::endl;
         g_targetX -= rightX * CAMERA_PAN_SPEED;
         g_targetY -= rightY * CAMERA_PAN_SPEED;
         g_targetZ -= rightZ * CAMERA_PAN_SPEED;
         std::cout << "DEBUG: A key - Pan Left. Target: (" << g_targetX << ", " << g_targetY << ", " << g_targetZ << ")" << std::endl;
         break;
     case 'd': case 'D': // Pan Right (move target point right relative to camera's right vector)
+        std::cout << "DEBUG: Before Pan Right - Target: (" << g_targetX << ", " << g_targetY << ", " << g_targetZ << ")" << std::endl;
         // 移动目标点，使其相对相机向右移动
         g_targetX += rightX * CAMERA_PAN_SPEED;
         g_targetY += rightY * CAMERA_PAN_SPEED;

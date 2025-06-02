@@ -98,34 +98,63 @@
 ### 1. main.cpp (运行主函数)
 	main.cpp 将是程序的入口点，主要负责初始化GLUT，设置回调函数，以及启动主循环。
 	
+
 **GLUT初始化：**
+	
 	glutInit(&argc, argv);
+	
 	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH); (双缓冲、RGB颜色、深度测试)
+
 **设置窗口大小和位置：**
+	
 	glutInitWindowSize(width, height); glutInitWindowPosition(x, y);
+
 **创建窗口：**
+	
 	glutCreateWindow("Computer Graphics Project");
+
 **回调函数注册：**
+	
 	显示回调： glutDisplayFunc(renderScene); (调用 render.cpp 中的渲染函数)
+	
 	窗口大小改变回调： glutReshapeFunc(changeSize); (处理窗口大小改变时的透视设置)
+	
 	键盘输入回调： glutKeyboardFunc(processNormalKeys); glutSpecialFunc(processSpecialKeys); (处理普通键和特殊键，例如方向键，调用 interaction.cpp 中的函数)
+	
 	鼠标事件回调： glutMouseFunc(mouseButton); (处理鼠标点击)
+	
 	鼠标移动回调： glutMotionFunc(mouseMove); (处理鼠标拖动，用于模型旋转/平移)
+	
 	空闲回调（可选）： glutIdleFunc(update); (如果需要连续动画或更新，可以在这里添加)
+
 **OpenGL状态初始化：**
+	
 	启用深度测试：glEnable(GL_DEPTH_TEST);
+	
 	启用光照：glEnable(GL_LIGHTING); (如果需要光照效果)
+	
 	设置光源（初始光源）：glEnable(GL_LIGHT0);
+	
 	设置背面剔除（可选）：glEnable(GL_CULL_FACE);
+	
 	设置平滑着色：glShadeModel(GL_SMOOTH);
+	
 	设置背景颜色：glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+
 **模型加载：**
+	
 	在进入主循环前，调用 parser1.cpp 中的函数加载模型数据。
+
 **进入主循环：**
+	
 	glutMainLoop();
+
 ### 2. parser1.cpp / parser1.h (模型解析)
+
 **loadModel(const char* filename)函数:**
+	
 	使用文件流（ifstream）打开并读取模型文件。
+	
 	按顺序解析数据：
 	 读取纹理文件数量，然后逐行读取纹理文件名。
 	 读取材质数量，然后循环读取每个材质的ambient, diffuse, specular, emission, shininess, textureIndex。
@@ -135,17 +164,19 @@
 	 读取模型分组数量。
 	 读取全局缩放系数。
 	循环读取每个子模型的三角形数量和材质索引，然后循环读取每个三角形的9个索引（vi, ti, ni）。
+	
 	纹理加载： 
 	 在读取纹理文件名后，需要加载纹理图片并生成OpenGL纹理ID。这可能需要额外的库，例如 SOIL2 或 FreeImage 来处理常见的图片格式（BMP, PNG, JPG 等）。如果没有，则需要自己实现BMP等格式的简单加载。
+	
 	错误处理：
 	 在文件读取过程中加入健壮的错误处理，例如文件不存在、数据格式错误等。
+
 ### 3. render.cpp / render.h (渲染处理)
  这个模块是实现模型显示和渲染模式切换的核心。
 	全局渲染状态变量：
 	
   在 render.h 中定义一些全局变量来控制渲染模式，例如：
 	C++
-
 	enum RenderMode { FILL, LINE, POINT };
 	extern RenderMode currentRenderMode;
 	extern bool enableTexture;
@@ -156,21 +187,34 @@
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
+
   视口操作： 根据交互模块的相机位置和方向设置 gluLookAt()。
+  
   坐标系显示（拓展目标）： 如果 displayCoordinateSystem 为 true，绘制XYZ轴。
+  
   模型渲染循环： 遍历加载的 Model 结构体：
+  
   应用全局缩放: glScalef(model.scale[0], model.scale[1], model.scale[2]);
+  
   遍历每个 SubModel：
+	
 	获取当前子模型的材质 Material currentMaterial = model.materials[subModel.materialIndex - 1]; (注意索引是从1开始)
+	
 	材质设置： 如果 enableMaterial 为 true 且 subModel.materialIndex 不为0，使用 glMaterialfv() 设置材质属性。
+	
 	纹理绑定： 如果 enableTexture 为 true 且 currentMaterial.textureIndex 不为0，以及对应的纹理已加载，则 glEnable(GL_TEXTURE_2D); glBindTexture(GL_TEXTURE_2D, model.textures[currentMaterial.textureIndex - 1].id);
+	
 	设置渲染模式： 根据 currentRenderMode 变量设置 glPolygonMode()：
 	GL_FILL (填充模式)
 	GL_LINE (线框模式)
 	GL_POINT (点模式)
+  
   遍历子模型中的每个 Face：
+	
 	glBegin(GL_TRIANGLES);
+  
   对于每个顶点：
+	
 	glNormal3fv(&model.normals[face.n_indices[i] - 1].x);
 	glTexCoord2fv(&model.texCoords[face.t_indices[i] - 1].u); (如果开启纹理)
 	glVertex3fv(&model.vertices[face.v_indices[i] - 1].x);
@@ -178,21 +222,25 @@
 	glDisable(GL_TEXTURE_2D); (渲染完一个子模型后禁用纹理，避免影响下一个)
 	glutSwapBuffers();
 	changeSize(int w, int h) 函数：
-	
 	if (h == 0) h = 1;
 	glViewport(0, 0, w, h);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	gluPerspective(45.0f, (float)w / (float)h, 0.1f, 1000.0f);
 	glMatrixMode(GL_MODELVIEW);
+
 渲染模式切换逻辑：
+	
 	在 render.h 中声明一些函数，如 toggleFillMode(), toggleLineMode(), togglePointMode(), toggleTexture(), toggleMaterial()。
 	这些函数修改 currentRenderMode, enableTexture, enableMaterial 等全局变量，然后调用 glutPostRedisplay(); 触发重绘。
+
 光照控制：
+	
 	实现函数来设置光源的位置 (glLightfv(GL_LIGHT0, GL_POSITION, ...);) 和类型（点光源、方向光等）。
 	可以通过键盘或鼠标交互来修改光源属性。
 	提示信息显示（拓展目标）：
 	可以使用GLUT的位图字体 glRasterPos2f() 和 glutBitmapCharacter() 在屏幕上显示当前渲染模式、相机坐标等信息。
+
 ### 4. interaction.cpp / interaction.h (交互处理)
 这个模块负责处理用户的输入，并更新相机位置、模型状态等。
 	相机变量：
@@ -206,6 +254,7 @@
 	extern int lastMouseX, lastMouseY; // 存储上次鼠标位置
 	extern bool isRotating; // 标记是否在旋转
 	extern bool isPanning; // 标记是否在平移
+
 **键盘回调函数：**
 	processNormalKeys(unsigned char key, int x, int y)：
 	例如：
@@ -226,8 +275,10 @@
 	mouseMove(int x, int y)：
 	如果 isRotating 为 true：根据 (x - lastMouseX) 和 (y - lastMouseY) 更新 angleY 和 angleX。然后更新 lastMouseX, lastMouseY 并调用 glutPostRedisplay();
 	如果 isPanning 为 true：根据鼠标移动更新相机或模型的平移量，然后调用 glutPostRedisplay();
+
 **视图重置：**
 	实现 resetView() 函数，将相机位置、旋转角度、缩放因子恢复到初始值。
+
 ### 5. Header (头文件目录)
 	确保头文件中只包含声明，并且有必要的包含卫士（#ifndef, #define, #endif）。
 	

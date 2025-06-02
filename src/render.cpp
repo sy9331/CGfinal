@@ -17,7 +17,7 @@
     float g_orbitalPitch = 0.0f; 
     float g_targetX = 0.0f, g_targetY = 0.0f, g_targetZ = 0.0f; 
     const double M_PI = 3.14159265358979323846;
-    
+
     // 其他场景状态变量 
     bool g_textureEnabled = false;
     bool g_materialEnabled = true;
@@ -69,6 +69,7 @@
     }
     //渲染主循环
     void renderScene() {
+        std::cout << "DEBUG: renderScene called. Current Target: (" << g_targetX << ", " << g_targetY << ", " << g_targetZ << ")" << std::endl;
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
@@ -167,7 +168,7 @@
             case POINT_MODE: mode_str = "Point Mode"; break;
             }
 			// 在窗口左上角显示当前渲染模式和其他信息
-            drawText(10, glutGet(GLUT_WINDOW_HEIGHT) - 100, "Press A/D to zoom in or zoom out");
+            drawText(10, glutGet(GLUT_WINDOW_HEIGHT) - 140, "Press w/s to zoom in or zoom out");
             drawText(10, glutGet(GLUT_WINDOW_HEIGHT) - 20, ("Mode:(Press 1/2/3) " + mode_str).c_str());
             drawText(10, glutGet(GLUT_WINDOW_HEIGHT) - 40, (g_enableTexture ? "Texture(Press:T): ON" : "Texture(Press:T): OFF"));
             drawText(10, glutGet(GLUT_WINDOW_HEIGHT) - 60, (g_enableMaterial ? "Material(Press:M): ON" : "Material(Press:M): OFF"));
