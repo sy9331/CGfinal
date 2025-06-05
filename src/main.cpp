@@ -13,7 +13,6 @@ void initOpenGL() {
     glEnable(GL_LIGHT0);
 
     // 设置光源0的位置 (点光源在相机位置)
-    // 根据你的需求可以设置为固定位置 (例如 [0, 0, 10, 1]) 或移动光源
     float light_position[] = { 0.0f, 0.0f, 5.0f, 1.0f }; // x, y, z, w (w=1.0f表示点光源, w=0.0f表示方向光)
     glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 

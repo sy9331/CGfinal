@@ -214,23 +214,6 @@ void mouseButton(int button, int state, int x, int y) {
             g_isPanning = false;
         }
     }
-    //好像glut不支持，所以就没做滚轮
-    //// 鼠标滚轮滑动控制缩放
-    //else if (button == 3) { 
-    //    g_orbitalDistance -= ORBITAL_ZOOM_SPEED;
-    //    if (g_orbitalDistance < 0.1f) g_orbitalDistance = 0.1f; // 限制最小距离
-    //    glutPostRedisplay();
-    //    if (g_currentProjectionMode == ORTHOGRAPHIC_PROJECTION) {
-    //        reshape(glutGet(GLUT_WINDOW_WIDTH), glutGet(GLUT_WINDOW_HEIGHT));
-    //    }
-    //}
-    //else if (button == 4) { 
-    //    g_orbitalDistance += ORBITAL_ZOOM_SPEED;
-    //    glutPostRedisplay();
-    //    if (g_currentProjectionMode == ORTHOGRAPHIC_PROJECTION) {
-    //        reshape(glutGet(GLUT_WINDOW_WIDTH), glutGet(GLUT_WINDOW_HEIGHT));
-    //    }
-    //}
 }
 
 //鼠标事件
